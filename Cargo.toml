@@ -4,7 +4,8 @@ members = [
     "rsonpath",
     "simd-codegen",
     "simd-benchmarks",
-    "decimal-byte-measurement"
+    "decimal-byte-measurement",
+    "rust-jsonski"
 ]
 
 [profile.dev]

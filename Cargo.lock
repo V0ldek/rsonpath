@@ -888,11 +888,20 @@ dependencies = [
  "memchr",
  "nom",
  "proptest",
+ "rust-jsonski",
  "simple_logger",
  "smallvec",
  "static_assertions",
  "test-case",
  "vector-map",
+]
+
+[[package]]
+name = "rust-jsonski"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "libc",
 ]
 
 [[package]]

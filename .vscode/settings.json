@@ -23,6 +23,7 @@
         "Hasher",
         "Itertools",
         "jsonpath",
+        "jsonski",
         "loadu",
         "mainsnak",
         "Mateusz",
