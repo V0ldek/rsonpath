@@ -46,12 +46,22 @@ fn rsonpath_stack_based_vs_stackless(c: &mut CriterionCtx, options: BenchmarkOpt
     group.bench_with_input(
         BenchmarkId::new("rsonpath", options.id),
         &contents,
-        |b, c| b.iter(|| rsonpath.run::<CountResult>(c)),
+        |b, c| {
+            b.iter(|| {
+                let res = rsonpath.run::<CountResult>(c);
+                assert_eq!(1, res.get());
+            })
+        },
     );
     group.bench_with_input(
         BenchmarkId::new("jsonski", options.id),
         &(&jsonski_record, options.jsonski_query_string),
-        |b, &(r, q)| b.iter(|| rust_jsonski::call_jsonski(q, *r)),
+        |b, &(r, q)| {
+            b.iter(|| {
+                let res = rust_jsonski::call_jsonski(q, *r);
+                assert_eq!(1, res);
+            });
+        },
     );
 
     group.finish();
