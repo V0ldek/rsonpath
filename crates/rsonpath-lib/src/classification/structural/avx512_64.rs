@@ -4,7 +4,6 @@ use super::{
 };
 use crate::{
     bin_u64,
-    classification::mask::m64,
     classification::{QuoteClassifiedBlock, ResumeClassifierBlockState},
     debug,
     input::InputBlock,
