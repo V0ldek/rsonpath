@@ -454,6 +454,8 @@ pub(crate) enum SimdTag {
     Ssse3,
     /// AVX2 detected.
     Avx2,
+    /// AVX512 detected.
+    Avx512
 }
 
 /// Runtime-detected SIMD configuration guiding how to construct a [`Simd`] implementation for the engine.
@@ -496,6 +498,7 @@ impl SimdConfiguration {
             "sse2" => Some(SimdTag::Sse2),
             "ssse3" => Some(SimdTag::Ssse3),
             "avx2" => Some(SimdTag::Avx2),
+            "avx512" => Some(SimdTag::Avx512),
             _ => None,
         };
         let quotes = match quotes_str.to_ascii_lowercase().as_ref() {
@@ -545,7 +548,9 @@ pub(crate) fn configure() -> SimdConfiguration {
         }
         else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         {
-            let highest_simd = if is_x86_feature_detected!("avx2") {
+            let highest_simd = if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512bw") {
+                SimdTag::Avx512
+            } else if is_x86_feature_detected!("avx2") {
                 SimdTag::Avx2
             } else if is_x86_feature_detected!("ssse3") {
                 SimdTag::Ssse3
@@ -581,6 +586,7 @@ impl Display for SimdConfiguration {
             SimdTag::Sse2 => "sse2",
             SimdTag::Ssse3 => "ssse3",
             SimdTag::Avx2 => "avx2",
+            SimdTag::Avx512 => "avx512",
         };
         let quote_desc = if self.fast_quotes { "fast_quotes" } else { "slow_quotes" };
         let popcnt_desc = if self.fast_popcnt { "fast_popcnt" } else { "slow_popcnt" };
@@ -591,7 +597,7 @@ impl Display for SimdConfiguration {
 
 pub(crate) const NOSIMD: usize = 0;
 
-cfg_if! {
+cfg_if! { // FIXME co to
     if #[cfg(any(target_arch = "x86_64", target_arch = "x86"))] {
         pub(crate) const AVX2_PCLMULQDQ_POPCNT: usize = 1;
         pub(crate) const SSSE3_PCLMULQDQ_POPCNT: usize = 2;
@@ -673,7 +679,20 @@ cfg_if! {
                     let conf = $conf;
 
                     match conf.highest_simd() {
-                        // AVX2 implies all other optimizations.
+                        // AVX512 implies all other optimizations.
+                        $crate::classification::simd::SimdTag::Avx512 => {
+                            assert!(conf.fast_quotes());
+                            assert!(conf.fast_popcnt());
+                            let $simd = $crate::classification::simd::ResolvedSimd::<
+                                $crate::classification::quotes::avx2_64::Constructor,
+                                $crate::classification::structural::avx512_64::Constructor,
+                                $crate::classification::depth::avx2_64::Constructor,
+                                $crate::classification::memmem::avx2_64::Constructor,
+                                {$crate::classification::simd::AVX2_PCLMULQDQ_POPCNT},
+                            >::new();
+                            $b
+                        }
+                        // AVX2 implies all optimizations other than 512.
                         $crate::classification::simd::SimdTag::Avx2 => {
                             assert!(conf.fast_quotes());
                             assert!(conf.fast_popcnt());
@@ -801,7 +820,9 @@ cfg_if! {
 
                     match conf.highest_simd() {
                         // AVX2 implies all other optimizations.
-                        $crate::classification::simd::SimdTag::Avx2 => {
+                        // AVX512 on x86 is yet to be implemented.
+                        $crate::classification::simd::SimdTag::Avx2 | 
+                        $crate::classification::simd::SimdTag::Avx512 => {
                             assert!(conf.fast_quotes());
                             assert!(conf.fast_popcnt());
                             let $simd = $crate::classification::simd::ResolvedSimd::<

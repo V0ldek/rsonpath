@@ -189,6 +189,8 @@
     warn(clippy::print_stderr, clippy::print_stdout, clippy::todo)
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![feature(stdarch_x86_avx512)]
+#![feature(avx512_target_feature)]
 
 pub mod automaton;
 pub mod classification;
@@ -206,6 +208,10 @@ cfg_if::cfg_if! {
     else if #[cfg(target_pointer_width = "64")] {
         pub(crate) const BLOCK_SIZE: usize = 64;
         pub(crate) type MaskType = u64;
+    }
+    else if #[cfg(target_pointer_width = "128")] {
+        pub(crate) const BLOCK_SIZE: usize = 128;
+        pub(crate) type MaskType = u128;
     }
 }
 
@@ -247,6 +253,26 @@ macro_rules! block {
 macro_rules! debug {
     (target: $target:expr, $($arg:tt)+) => {};
     ($($arg:tt)+) => {};
+}
+
+/// Debug log the given u128 expression by its full 128-bit binary string representation.
+#[allow(unused_macros)]
+macro_rules! bin_u128 {
+    ($name:expr, $e:expr) => {
+        $crate::debug!(
+            "{: >24}: {:128b} ({})",
+            $name,
+            {
+                let mut res = 0_u128;
+                for i in 0..128 {
+                    let bit = (($e) & (1 << i)) >> i;
+                    res |= bit << (127 - i);
+                }
+                res
+            },
+            $e
+        );
+    };
 }
 
 /// Debug log the given u64 expression by its full 64-bit binary string representation.
@@ -293,6 +319,8 @@ macro_rules! bin_u32 {
 pub(crate) use bin_u32;
 #[allow(unused_imports)]
 pub(crate) use bin_u64;
+#[allow(unused_imports)]
+pub(crate) use bin_u128;
 #[allow(unused_imports)]
 pub(crate) use block;
 #[allow(unused_imports)]
