@@ -208,8 +208,8 @@ cfg_if::cfg_if! {
     else if #[cfg(target_pointer_width = "64")] {
         pub(crate) const BLOCK_SIZE: usize = 64;
         pub(crate) type MaskType = u64;
-    }
-    else if #[cfg(target_pointer_width = "128")] {
+    } 
+    else { // wont happen FIXME
         pub(crate) const BLOCK_SIZE: usize = 128;
         pub(crate) type MaskType = u128;
     }
