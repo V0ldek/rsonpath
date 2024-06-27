@@ -1,22 +1,22 @@
 use super::{
-    shared::{mask_128, vector_512},
+    shared::{mask_64, vector_512},
     *,
 };
 use crate::{
-    bin_u128,
-    classification::mask::m128,
+    bin_u64,
+    classification::mask::m64,
     classification::{QuoteClassifiedBlock, ResumeClassifierBlockState},
     debug,
     input::InputBlock,
 };
 
-super::shared::structural_classifier!(Avx512Classifier128, BlockAvx512Classifier128, mask_128, 128, u128);
+super::shared::structural_classifier!(Avx512Classifier64, BlockAvx512Classifier64, mask_64, 64, u64);
 
-struct BlockAvx512Classifier128 {
+struct BlockAvx512Classifier64 {
     internal_classifier: vector_512::BlockClassifier512,
 }
 
-impl BlockAvx512Classifier128 {
+impl BlockAvx512Classifier64 {
     fn new() -> Self {
         Self {
             // SAFETY: target feature invariant
@@ -25,20 +25,19 @@ impl BlockAvx512Classifier128 {
     }
 
     #[inline(always)]
-    unsafe fn classify<'i, B: InputBlock<'i, 128>>(
+    unsafe fn classify<'i, B: InputBlock<'i, 64>>(
         &mut self,
-        quote_classified_block: QuoteClassifiedBlock<B, u128, 128>,
-    ) -> mask_128::StructuralsBlock<B> {
-        let (block1, block2) = quote_classified_block.block.halves();
-        let classification1 = self.internal_classifier.classify_block(block1);
-        let classification2 = self.internal_classifier.classify_block(block2);
+        quote_classified_block: QuoteClassifiedBlock<B, u64, 64>,
+    ) -> mask_64::StructuralsBlock<B> {
+        let block = &quote_classified_block.block;
+        let classification = self.internal_classifier.classify_block(block);
 
-        let structural = m128::combine_64(classification1.structural, classification2.structural);
+        let structural = classification.structural;
         let nonquoted_structural = structural & !quote_classified_block.within_quotes_mask;
 
-        bin_u128!("structural", structural);
-        bin_u128!("nonquoted_structural", nonquoted_structural);
+        bin_u64!("structural", structural);
+        bin_u64!("nonquoted_structural", nonquoted_structural);
 
-        mask_128::StructuralsBlock::new(quote_classified_block, nonquoted_structural)
+        mask_64::StructuralsBlock::new(quote_classified_block, nonquoted_structural)
     }
 }

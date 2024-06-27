@@ -2,8 +2,6 @@
 pub(super) mod mask_32;
 #[cfg(target_arch = "x86_64")]
 pub(super) mod mask_64;
-#[cfg(target_arch = "x86_64")]
-pub(super) mod mask_128;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub(super) mod vector_128;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
