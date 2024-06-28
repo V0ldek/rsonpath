@@ -599,18 +599,24 @@ pub(crate) const NOSIMD: usize = 0;
 
 cfg_if! { // FIXME co to
     if #[cfg(any(target_arch = "x86_64", target_arch = "x86"))] {
-        pub(crate) const AVX2_PCLMULQDQ_POPCNT: usize = 1;
-        pub(crate) const SSSE3_PCLMULQDQ_POPCNT: usize = 2;
-        pub(crate) const SSSE3_PCLMULQDQ: usize = 3;
-        pub(crate) const SSSE3_POPCNT: usize = 4;
-        pub(crate) const SSSE3: usize = 5;
-        pub(crate) const SSE2_PCLMULQDQ_POPCNT: usize = 6;
-        pub(crate) const SSE2_PCLMULQDQ: usize = 7;
-        pub(crate) const SSE2_POPCNT: usize = 8;
-        pub(crate) const SSE2: usize = 9;
+        pub(crate) const AVX512_PCLMULQDQ_POPCNT: usize = 1;
+        pub(crate) const AVX2_PCLMULQDQ_POPCNT: usize = 2;
+        pub(crate) const SSSE3_PCLMULQDQ_POPCNT: usize = 3;
+        pub(crate) const SSSE3_PCLMULQDQ: usize = 4;
+        pub(crate) const SSSE3_POPCNT: usize = 5;
+        pub(crate) const SSSE3: usize = 6;
+        pub(crate) const SSE2_PCLMULQDQ_POPCNT: usize = 7;
+        pub(crate) const SSE2_PCLMULQDQ: usize = 8;
+        pub(crate) const SSE2_POPCNT: usize = 9;
+        pub(crate) const SSE2: usize = 10;
 
         macro_rules! dispatch_simd {
             ($simd:expr; $( $arg:expr ),* => fn $( $fn:tt )*) => {{
+                #[target_feature(enable = "avx512f")]
+                #[target_feature(enable = "avx512bw")]
+                #[target_feature(enable = "pclmulqdq")]
+                #[target_feature(enable = "popcnt")]
+                unsafe fn avx512_pclmulqdq_popcnt $($fn)*
                 #[target_feature(enable = "avx2")]
                 #[target_feature(enable = "pclmulqdq")]
                 #[target_feature(enable = "popcnt")]
@@ -646,6 +652,7 @@ cfg_if! { // FIXME co to
                 // SAFETY: depends on the provided SimdConfig, which cannot be incorrectly constructed.
                 unsafe {
                     match simd.dispatch_tag() {
+                        $crate::classification::simd::AVX512_PCLMULQDQ_POPCNT => avx512_pclmulqdq_popcnt($($arg),*),
                         $crate::classification::simd::AVX2_PCLMULQDQ_POPCNT => avx2_pclmulqdq_popcnt($($arg),*),
                         $crate::classification::simd::SSSE3_PCLMULQDQ_POPCNT => ssse3_pclmulqdq_popcnt($($arg),*),
                         $crate::classification::simd::SSSE3_PCLMULQDQ => ssse3_pclmulqdq($($arg),*),
@@ -688,7 +695,7 @@ cfg_if! {
                                 $crate::classification::structural::avx512_64::Constructor,
                                 $crate::classification::depth::avx2_64::Constructor,
                                 $crate::classification::memmem::avx2_64::Constructor,
-                                {$crate::classification::simd::AVX2_PCLMULQDQ_POPCNT},
+                                {$crate::classification::simd::AVX512_PCLMULQDQ_POPCNT},
                             >::new();
                             $b
                         }
