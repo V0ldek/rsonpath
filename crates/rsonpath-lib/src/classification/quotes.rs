@@ -97,6 +97,8 @@ where
 pub(crate) mod nosimd;
 pub(crate) mod shared;
 
+#[cfg(target_arch = "x86_64")]
+pub(crate) mod avx512_64;
 #[cfg(target_arch = "x86")]
 pub(crate) mod avx2_32;
 #[cfg(target_arch = "x86_64")]

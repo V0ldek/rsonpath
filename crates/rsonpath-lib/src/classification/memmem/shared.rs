@@ -12,6 +12,8 @@ pub(super) mod mask_64;
 pub(super) mod vector_128;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub(super) mod vector_256;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+pub(super) mod vector_512;
 
 pub(crate) fn find_label_in_first_block<'i, 'r, I, const N: usize>(
     input: &I,

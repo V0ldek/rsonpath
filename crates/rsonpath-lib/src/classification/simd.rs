@@ -691,10 +691,10 @@ cfg_if! {
                             assert!(conf.fast_quotes());
                             assert!(conf.fast_popcnt());
                             let $simd = $crate::classification::simd::ResolvedSimd::<
-                                $crate::classification::quotes::avx2_64::Constructor,
+                                $crate::classification::quotes::avx512_64::Constructor,
                                 $crate::classification::structural::avx512_64::Constructor,
-                                $crate::classification::depth::avx2_64::Constructor,
-                                $crate::classification::memmem::avx2_64::Constructor,
+                                $crate::classification::depth::avx512_64::Constructor,
+                                $crate::classification::memmem::avx512_64::Constructor,
                                 {$crate::classification::simd::AVX512_PCLMULQDQ_POPCNT},
                             >::new();
                             $b
