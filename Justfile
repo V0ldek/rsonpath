@@ -47,6 +47,9 @@ build-bin profile="dev": (build-lib profile)
 build-lib profile="dev":
     cargo build --package rsonpath-lib --profile {{profile}}
 
+build-avx512 profile="dev":
+    rustup run nightly cargo build  --package rsonpath-lib --profile dev
+
 # Build all rsonpath parts, the binary and library.
 build-all profile="dev": (build-lib profile) (build-bin profile) (gen-tests)
 

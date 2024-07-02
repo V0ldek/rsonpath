@@ -49,6 +49,7 @@ default = ["simd"]
 arbitrary = ["dep:arbitrary"]
 simd = []
 
+
 [[example]]
 name = "approx_spans_usage"
 path = "examples/approx_spans_usage.rs"

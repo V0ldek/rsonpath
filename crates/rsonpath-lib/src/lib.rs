@@ -189,6 +189,8 @@
     warn(clippy::print_stderr, clippy::print_stdout, clippy::todo)
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![feature(stdarch_x86_avx512)]
+#![feature(avx512_target_feature)]
 
 pub mod automaton;
 pub mod classification;
@@ -206,7 +208,7 @@ cfg_if::cfg_if! {
     else if #[cfg(target_pointer_width = "64")] {
         pub(crate) const BLOCK_SIZE: usize = 64;
         pub(crate) type MaskType = u64;
-    }
+    } 
 }
 
 /// Macro for debug logging. Evaluates to [`log::debug`], if debug assertions are enabled.
